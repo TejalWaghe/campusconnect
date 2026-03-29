@@ -1,0 +1,77 @@
+body{
+margin:0;
+font-family:"Segoe UI", sans-serif;
+}
+
+.auth-left{
+background:#000;
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.auth-form{
+width:70%;
+}
+
+.auth-form h2{
+color:white;
+font-weight:700;
+}
+
+.auth-form p{
+color:#aaa;
+}
+
+.auth-right{
+background:linear-gradient(135deg,#8A00C4,#B14EFF);
+display:flex;
+align-items:center;
+justify-content:center;
+text-align:center;
+color:white;
+}
+
+.auth-right h1{
+font-size:60px;
+font-weight:700;
+}
+
+.auth-right p{
+font-size:18px;
+}
+
+input{
+background:#111 !important;
+border:none !important;
+border-bottom:1px solid #444 !important;
+color:white !important;
+border-radius:0 !important;
+}
+
+input:focus{
+box-shadow:none !important;
+border-color:#B14EFF !important;
+}
+
+button{
+background:#777;
+border:none;
+}
+
+button:disabled{
+background:#555;
+}
+
+.password-wrapper{
+position:relative;
+}
+
+.password-wrapper i{
+position:absolute;
+right:10px;
+top:50%;
+transform:translateY(-50%);
+cursor:pointer;
+color:#aaa;
+}
