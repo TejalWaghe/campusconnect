@@ -2,13 +2,7 @@
 session_start();
 include("config.php");
 include("smtp_config.php");
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require 'PHPMailer/src/Exception.php';
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
+include("send_mail.php"); // ✅ IMPORTANT
 
 /* 🔥 ROLE DETECT */
 $role = $_GET['role'] ?? 'student'; // default student
@@ -21,71 +15,68 @@ if(isset($_POST['submit'])){
 $email = trim($_POST['email']);
 
 if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
-$message = "Invalid email format.";
+    $message = "Invalid email format.";
 } else {
 
-$stmt = $conn->prepare("SELECT id FROM users WHERE email=?");
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
+    $stmt = $conn->prepare("SELECT id FROM users WHERE email=?");
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if($result->num_rows == 1){
+    if($result->num_rows == 1){
 
-$token = bin2hex(random_bytes(32));
+        $token = bin2hex(random_bytes(32));
 
-$update = $conn->prepare("
-UPDATE users 
-SET reset_token = ?, 
-reset_token_expiry = DATE_ADD(NOW(), INTERVAL 30 MINUTE)
-WHERE email = ?
-");
-$update->bind_param("ss", $token, $email);
-$update->execute();
+        $update = $conn->prepare("
+        UPDATE users 
+        SET reset_token = ?, 
+        reset_token_expiry = DATE_ADD(NOW(), INTERVAL 30 MINUTE)
+        WHERE email = ?
+        ");
+        $update->bind_param("ss", $token, $email);
+        $update->execute();
 
-/* 🔥 PASS ROLE IN RESET LINK */
-$reset_link = "https://campusconnect-ee48.onrender.com/reset_password.php?token=".$token."&role=".$role;
+        /* 🔥 PASS ROLE IN RESET LINK */
+        $reset_link = BASE_URL . "/reset_password.php?token=".$token."&role=".$role;
 
-$mail = new PHPMailer(true);
+        // ✅ EMAIL CONTENT
+        $subject = "Reset Your Password - CampusConnect";
 
-try {
-$mail->isSMTP();
-$mail->Host       = 'smtp-relay.brevo.com';
-$mail->SMTPAuth   = true;
-$mail->Username   = 'a66a88001@smtp-brevo.com';
-$mail->Password   = 'Zvs7Y4f5D2OXmrBP';
-$mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-$mail->Port = 587;
+        $body = "
+        <h3>Password Reset Request</h3>
+        <p>Hello,</p>
+        <p>Click below to reset your password:</p>
+        <br>
+        <a href='$reset_link' style='
+            background:#B14EFF;
+            color:white;
+            padding:10px 20px;
+            text-decoration:none;
+            border-radius:5px;
+        '>Reset Password</a>
+        <br><br>
+        <p>This link expires in 30 minutes.</p>
+        ";
 
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-$mail->addAddress($email);
+        // ✅ SEND EMAIL USING BREVO API
+        $sent = sendMail($email, "User", $subject, $body);
 
-$mail->isHTML(true);
-$mail->Subject = 'Reset Your Password - CampusConnect';
-$mail->Body = "
-<h3>Password Reset Request</h3>
-<p>Hello,</p>
-<p>Click below to reset your password:</p>
-<p><a href='$reset_link'>Reset Password</a></p>
-<p>This link expires in 30 minutes.</p>
-";
+        if($sent){
+            $message = "Reset link sent to your email.";
+            $success = true;
+        } else {
+            $message = "Failed to send reset email.";
+        }
 
-$mail->send();
+        $update->close();
 
-$message = "Reset link sent to your email.";
-$success = true;
+    } else {
+        // Security message (do not reveal if email exists)
+        $message = "If this email exists, a reset link has been sent.";
+        $success = true;
+    }
 
-} catch (Exception $e) {
-$message = "Failed to send reset email.";
-}
-
-$update->close();
-
-} else {
-$message = "If this email exists, a reset link has been sent.";
-$success = true;
-}
-
-$stmt->close();
+    $stmt->close();
 }
 }
 ?>
