@@ -63,7 +63,7 @@ if(isset($_POST['register'])) {
 
         if($stmt->execute()) {
 
-            $verification_link = "https://campusconnect-xccs.onrender.com/verify.php?token=" . $verification_token;
+            $verification_link = "https://campusconnect-ee48.onrender.com/verify.php?token=" . $verification_token;
 
             $mail = new PHPMailer(true);
 
