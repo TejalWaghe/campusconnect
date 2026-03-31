@@ -63,7 +63,7 @@ if(isset($_POST['register'])) {
 
         if($stmt->execute()) {
 
-            $verification_link = "http://campusconnect2026.wuaze.com/verify.php?token=" . $verification_token;
+            $verification_link = "https://campusconnect-xccs.onrender.com/verify.php?token=" . $verification_token;
 
             $mail = new PHPMailer(true);
 
@@ -84,7 +84,7 @@ $mail->setFrom(SMTP_EMAIL, 'CampusConnect');
                 $mail->Body = "
                     <h3>Welcome to CampusConnect!</h3>
                     <p>Please click below to verify your account:</p>
-                    <a href='verify.php'>Verify Account</a>
+                    <a href='$verification_link'>Verify Account</a>
                 ";
                 $mail->send();
 
