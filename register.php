@@ -87,7 +87,8 @@ $mail->setFrom(SMTP_EMAIL, 'CampusConnect');
                     <a href='$verification_link'>Verify Account</a>
                 ";
                 $mail->send();
-
+$mail->SMTPDebug = 2;
+$mail->Debugoutput = 'html';
                 $success = "Registration successful! Please check your email to verify your account.";
 
             } catch (Exception $e) {
