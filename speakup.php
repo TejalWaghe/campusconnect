@@ -61,9 +61,12 @@ if(mysqli_query($conn, $sql)) {
 
 require "send_mail.php";
 
-$admin = mysqli_fetch_assoc(mysqli_query($conn,"SELECT email,fullname FROM users WHERE role='admin' LIMIT 1"));
+$admins = mysqli_query($conn,"
+SELECT email, fullname FROM users WHERE role='admin'
+");
 
-if($admin){
+while($admin = mysqli_fetch_assoc($admins)) {
+
     try {
         sendAdminNotification(
             $admin['email'],
@@ -74,7 +77,7 @@ if($admin){
             $message_date
         );
     } catch (Exception $e){
-        // DO NOTHING → prevents crash
+        // skip error, continue to next admin
     }
 }
 
