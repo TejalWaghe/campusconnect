@@ -84,7 +84,7 @@ $mail->setFrom(SMTP_EMAIL, 'CampusConnect');
                 $mail->Body = "
                     <h3>Welcome to CampusConnect!</h3>
                     <p>Please click below to verify your account:</p>
-                    <a href='$verification_link'>Verify Account</a>
+                    <a href="verify.php">Verify Account</a>
                 ";
                 $mail->send();
 
