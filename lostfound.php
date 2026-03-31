@@ -82,7 +82,7 @@ if(isset($_POST['submit'])) {
 
         $stmt = $conn->prepare("
             INSERT INTO lost_and_found
-            (user_id,type,description,item_date,category,image)
+(user_id,item_type,description,item_date,category,image)
             VALUES (?,?,?,?,?,?)
         ");
 
