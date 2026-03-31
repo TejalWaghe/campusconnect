@@ -24,6 +24,7 @@ if(isset($_GET['success'])) {
 if(isset($_POST['submit'])) {
 
     $description = mysqli_real_escape_string($conn, $_POST['description']);
+    $item_name = mysqli_real_escape_string($conn, $_POST['item_name']);
     $category = mysqli_real_escape_string($conn, $_POST['category']);
     $type = mysqli_real_escape_string($conn, $_POST['type']);
     $user_id = $_SESSION['user_id'];
@@ -82,17 +83,18 @@ if(isset($_POST['submit'])) {
 
         $stmt = $conn->prepare("
             INSERT INTO lost_and_found
-(user_id,item_type,description,item_date,category,image)
-            VALUES (?,?,?,?,?,?)
+(user_id,item_name,item_type,description,item_date,category,image)
+VALUES (?,?,?,?,?,?,?)
         ");
 
-        $stmt->bind_param("isssss",
+        $stmt->bind_param("issssss",
             $user_id,
-            $type,
-            $description,
-            $item_date,
-            $category,
-            $image_url
+    $item_name,
+    $type,
+    $description,
+    $item_date,
+    $category,
+    $image_url
         );
 
         if($stmt->execute()){
@@ -238,6 +240,11 @@ color:white;
 <label class="form-label">Item Description</label>
 <textarea name="description" class="form-control" id="descBox" maxlength="300" required></textarea>
 <small id="descCount">0 / 300 characters</small>
+</div>
+
+<div class="mb-3">
+<label class="form-label">Item Name</label>
+<input type="text" name="item_name" class="form-control" required>
 </div>
 
 <!-- CATEGORY -->
