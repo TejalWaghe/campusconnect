@@ -53,13 +53,24 @@ if(isset($_POST['submit'])) {
         }
 
         if(empty($error)) {
-            $new_filename = time()."_".bin2hex(random_bytes(5)).".".$file_extension;
-            $upload_path = "uploads/".$new_filename;
 
-            if(!move_uploaded_file($image_tmp,$upload_path)){
-                $error = "Upload failed.";
-            }
-        }
+    $target_dir = "uploads/";
+
+    // 🔥 Create folder if not exists
+    if (!is_dir($target_dir)) {
+        mkdir($target_dir, 0777, true);
+    }
+
+    // 🔥 Give write permission
+    chmod($target_dir, 0777);
+
+    $new_filename = time()."_".bin2hex(random_bytes(5)).".".$file_extension;
+    $upload_path = $target_dir . $new_filename;
+
+    if(!move_uploaded_file($image_tmp,$upload_path)){
+        $error = "Upload failed.";
+    }
+}
 
     } else {
         $error = "Please upload an image.";
