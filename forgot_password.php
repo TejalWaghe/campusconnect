@@ -43,7 +43,7 @@ $update->bind_param("ss", $token, $email);
 $update->execute();
 
 /* 🔥 PASS ROLE IN RESET LINK */
-$reset_link = "https://campusconnect2026.wuaze.com/reset_password.php?token=".$token."&role=".$role;
+$reset_link = "https://campusconnect-xccs.onrender.com/reset_password.php?token=".$token."&role=".$role;
 
 $mail = new PHPMailer(true);
 
