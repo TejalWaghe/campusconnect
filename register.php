@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 
 session_start();
 include("config.php");
-include("smtp_config.php");
+require_once("smtp_config.php");
 include("send_mail.php"); // ✅ NEW
 
 $error = "";
