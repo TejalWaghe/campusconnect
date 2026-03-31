@@ -1,11 +1,50 @@
 <?php
 include("smtp_config.php");
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
 
-require 'PHPMailer/src/Exception.php';
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
+/* =========================================
+   COMMON FUNCTION (DO NOT MODIFY)
+========================================= */
+
+function sendMail($toEmail, $toName, $subject, $htmlContent){
+
+    $data = [
+        "sender" => [
+            "email" => SENDER_EMAIL,
+            "name"  => SENDER_NAME
+        ],
+        "to" => [
+            [
+                "email" => $toEmail,
+                "name"  => $toName
+            ]
+        ],
+        "subject" => $subject,
+        "htmlContent" => $htmlContent
+    ];
+
+    $ch = curl_init();
+
+    curl_setopt($ch, CURLOPT_URL, "https://api.brevo.com/v3/smtp/email");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        "accept: application/json",
+        "api-key: " . BREVO_API_KEY,
+        "content-type: application/json"
+    ]);
+
+    $response = curl_exec($ch);
+
+    if(curl_errno($ch)){
+        error_log("Curl Error: " . curl_error($ch));
+        return false;
+    }
+
+    curl_close($ch);
+    return true;
+}
 
 /* ===============================
    EMAIL TO STUDENT WHEN STATUS UPDATED
@@ -13,47 +52,21 @@ require 'PHPMailer/src/SMTP.php';
 
 function sendComplaintUpdate($email, $name, $title, $status){
 
-$mail = new PHPMailer(true);
+    $subject = "CampusConnect Message Update";
 
-try{
+    $body = "
+    Hello <b>$name</b>,<br><br>
 
-$mail->isSMTP();
-    $mail->Timeout = 5;
-$mail->Host = SMTP_HOST;
-$mail->SMTPAuth = true;
-$mail->Username = SMTP_USER;
-$mail->Password = SMTP_PASS;
-$mail->SMTPSecure = SMTP_SECURE;
-$mail->Port = SMTP_PORT;
+    Your message <b>$title</b> status has been updated to:<br><br>
 
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-$mail->addAddress($email,$name);
+    <b>$status</b><br><br>
 
-$mail->isHTML(true);
+    Thank you,<br>
+    CampusConnect System
+    ";
 
-$mail->Subject = "CampusConnect Complaint Update";
-
-$mail->Body = "
-Hello <b>$name</b>,<br><br>
-
-Your complaint <b>$title</b> status has been updated to:<br><br>
-
-<b>$status</b><br><br>
-
-Thank you,<br>
-CampusConnect System
-";
-
-if(!$mail->send()){
-    error_log("Mail Error: " . $mail->ErrorInfo);
+    sendMail($email, $name, $subject, $body);
 }
-
-}catch(Exception $e){
-    error_log("Mailer Error: " . $mail->ErrorInfo);
-}
-
-}
-
 
 /* ===============================
    EMAIL TO ADMINS WHEN STUDENT SUBMITS COMPLAINT
@@ -61,51 +74,25 @@ if(!$mail->send()){
 
 function sendAdminNotification($email,$admin_name,$student_name,$title,$category,$date){
 
-$mail = new PHPMailer(true);
+    $subject = "New SpeakUp Message Submitted";
 
-try{
+    $body = "
+    Hello <b>$admin_name</b>,<br><br>
 
-$mail->isSMTP();
-    $mail->Timeout = 5;
-$mail->Host = SMTP_HOST;
-$mail->SMTPAuth = true;
-$mail->Username = SMTP_USER;
-$mail->Password = SMTP_PASS;
-$mail->SMTPSecure = SMTP_SECURE;
-$mail->Port = SMTP_PORT;
+    A new SpeakUp message has been submitted on CampusConnect.<br><br>
 
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-$mail->addAddress($email,$admin_name);
+    <b>Student:</b> $student_name <br>
+    <b>Title:</b> $title <br>
+    <b>Category:</b> $category <br>
+    <b>Date:</b> $date <br><br>
 
-$mail->isHTML(true);
+    Please login to the admin dashboard to review it.<br><br>
 
-$mail->Subject = "New SpeakUp Message Submitted";
+    CampusConnect System
+    ";
 
-$mail->Body = "
-Hello <b>$admin_name</b>,<br><br>
-
-A new SpeakUp complaint has been submitted on CampusConnect.<br><br>
-
-<b>Student:</b> $student_name <br>
-<b>Title:</b> $title <br>
-<b>Category:</b> $category <br>
-<b>Date:</b> $date <br><br>
-
-Please login to the admin dashboard to review it.<br><br>
-
-CampusConnect System
-";
-
-if(!$mail->send()){
-    error_log("Mail Error: " . $mail->ErrorInfo);
+    sendMail($email, $admin_name, $subject, $body);
 }
-
-}catch(Exception $e){
-    error_log("Mailer Error: " . $mail->ErrorInfo);
-}
-
-}
-
 
 /* ===============================
    EMAIL TO ALL USERS WHEN LOST/FOUND POSTED
@@ -113,50 +100,24 @@ if(!$mail->send()){
 
 function sendLostFoundNotification($email,$name,$type,$category,$description){
 
-$mail = new PHPMailer(true);
+    $subject = "CampusConnect Lost & Found Alert";
 
-try{
+    $body = "
+    Hello <b>$name</b>,<br><br>
 
-$mail->isSMTP();
-    $mail->Timeout = 5;
-$mail->Host = SMTP_HOST;
-$mail->SMTPAuth = true;
-$mail->Username = SMTP_USER;
-$mail->Password = SMTP_PASS;
-$mail->SMTPSecure = SMTP_SECURE;
-$mail->Port = SMTP_PORT;
+    A new item has been reported in the <b>Lost & Found Portal</b>.<br><br>
 
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-$mail->addAddress($email,$name);
+    <b>Type:</b> $type <br>
+    <b>Category:</b> $category <br>
+    <b>Description:</b> $description <br><br>
 
-$mail->isHTML(true);
+    If this item belongs to you, please login to CampusConnect.<br><br>
 
-$mail->Subject = "CampusConnect Lost & Found Alert";
+    CampusConnect System
+    ";
 
-$mail->Body = "
-Hello <b>$name</b>,<br><br>
-
-A new item has been reported in the <b>Lost & Found Portal</b>.<br><br>
-
-<b>Type:</b> $type <br>
-<b>Category:</b> $category <br>
-<b>Description:</b> $description <br><br>
-
-If this item belongs to you, please login to CampusConnect.<br><br>
-
-CampusConnect System
-";
-
-if(!$mail->send()){
-    error_log("Mail Error: " . $mail->ErrorInfo);
+    sendMail($email, $name, $subject, $body);
 }
-
-}catch(Exception $e){
-    error_log("Mailer Error: " . $mail->ErrorInfo);
-}
-
-}
-
 
 /* ===============================
    EMAIL TO STUDENTS WHEN NEW POLL CREATED
@@ -164,45 +125,21 @@ if(!$mail->send()){
 
 function sendPollNotification($email,$name,$question,$expiry){
 
-$mail = new PHPMailer(true);
+    $subject = "New Poll on CampusConnect";
 
-try{
+    $body = "
+    Hello <b>$name</b>,<br><br>
 
-$mail->isSMTP();
-    $mail->Timeout = 5;
-$mail->Host = SMTP_HOST;
-$mail->SMTPAuth = true;
-$mail->Username = SMTP_USER;
-$mail->Password = SMTP_PASS;
-$mail->SMTPSecure = SMTP_SECURE;
-$mail->Port = SMTP_PORT;
+    A new poll has been created on CampusConnect.<br><br>
 
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-$mail->addAddress($email,$name);
+    <b>Question:</b> $question <br>
+    <b>Expiry Date:</b> $expiry <br><br>
 
-$mail->isHTML(true);
+    Please login to CampusConnect to vote.<br><br>
 
-$mail->Subject = "New Poll on CampusConnect";
+    CampusConnect System
+    ";
 
-$mail->Body = "
-Hello <b>$name</b>,<br><br>
-
-A new poll has been created on CampusConnect.<br><br>
-
-<b>Question:</b> $question <br>
-<b>Expiry Date:</b> $expiry <br><br>
-
-Please login to CampusConnect to vote.<br><br>
-
-CampusConnect System
-";
-
-if(!$mail->send()){
-    error_log("Mail Error: " . $mail->ErrorInfo);
+    sendMail($email, $name, $subject, $body);
 }
-
-}catch(Exception $e){
-    error_log("Mailer Error: " . $mail->ErrorInfo);
-}
-
-}
+?>
