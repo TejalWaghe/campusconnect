@@ -3,6 +3,10 @@ session_start();
 include("config.php");
 include("send_mail.php");
 
+require 'cloudinary_config.php';
+
+use Cloudinary\Api\Upload\UploadApi;
+
 if(!isset($_SESSION['role']) || $_SESSION['role'] != "student") {
     header("Location: login.php");
     exit();
@@ -26,7 +30,7 @@ if(isset($_POST['submit'])) {
 
     $item_date = date("Y-m-d");
 
-    /* IMAGE UPLOAD */
+    /* IMAGE VALIDATION */
 
     if(isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
 
@@ -52,31 +56,27 @@ if(isset($_POST['submit'])) {
             $error = "Max size 2MB.";
         }
 
+        /* CLOUDINARY UPLOAD */
         if(empty($error)) {
 
-    $target_dir = "uploads/";
+            try {
 
-    // 🔥 Create folder if not exists
-    if (!is_dir($target_dir)) {
-        mkdir($target_dir, 0777, true);
-    }
+                $upload = (new UploadApi())->upload($image_tmp, [
+                    'folder' => 'campusconnect'
+                ]);
 
-    // 🔥 Give write permission
-    chmod($target_dir, 0777);
+                $image_url = $upload['secure_url'];
 
-    $new_filename = time()."_".bin2hex(random_bytes(5)).".".$file_extension;
-    $upload_path = $target_dir . $new_filename;
-
-    if(!move_uploaded_file($image_tmp,$upload_path)){
-        $error = "Upload failed.";
-    }
-}
+            } catch (Exception $e){
+                $error = "Cloud upload failed.";
+            }
+        }
 
     } else {
         $error = "Please upload an image.";
     }
 
-    /* INSERT */
+    /* INSERT INTO DATABASE */
 
     if(empty($error)) {
 
@@ -92,32 +92,28 @@ if(isset($_POST['submit'])) {
             $description,
             $item_date,
             $category,
-            $new_filename
+            $image_url
         );
 
         if($stmt->execute()){
 
-         /* GET ALL USERS */
+            /* SEND EMAIL TO ALL USERS */
 
-         $result = $conn->query("SELECT email,fullname FROM users WHERE is_verified = 1");
+            $result = $conn->query("SELECT email,fullname FROM users WHERE is_verified = 1");
 
-        while($row = $result->fetch_assoc()){
+            while($row = $result->fetch_assoc()){
 
-         $email = $row['email'];
-         $name = $row['fullname'];
+                sendLostFoundNotification(
+                    $row['email'],
+                    $row['fullname'],
+                    $type,
+                    $category,
+                    $description
+                );
+            }
 
-         sendLostFoundNotification(
-         $email,
-         $name,
-         $type,
-         $category,
-         $description
-         );
-
-         }
-
-         header("Location: lostfound.php?success=1");
-         exit();
+            header("Location: lostfound.php?success=1");
+            exit();
 
         } else {
             $error = "Database error.";
