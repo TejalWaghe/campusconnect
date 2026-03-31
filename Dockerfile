@@ -1,12 +1,16 @@
 FROM php:8.2-apache
 
-# Install mysqli extension
+RUN apt-get update && apt-get install -y unzip git curl
+
+COPY . /var/www/html/
+
 RUN docker-php-ext-install mysqli
 
-# Enable Apache rewrite
-RUN a2enmod rewrite
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy project files
-COPY . /var/www/html/
+WORKDIR /var/www/html
+RUN composer install
+
+RUN chown -R www-data:www-data /var/www/html
 
 EXPOSE 80
