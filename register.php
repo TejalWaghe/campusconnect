@@ -5,13 +5,7 @@ ini_set('display_errors', 1);
 session_start();
 include("config.php");
 include("smtp_config.php");
-
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
-
-require 'PHPMailer/src/Exception.php';
-require 'PHPMailer/src/PHPMailer.php';
-require 'PHPMailer/src/SMTP.php';
+include("send_mail.php"); // ✅ NEW
 
 $error = "";
 $success = "";
@@ -24,7 +18,7 @@ if(isset($_POST['register'])) {
     $confirm_password = $_POST['confirm_password'];
     $role = "student";
 
-    // Backend validation (IMPORTANT)
+    // Validation
     if($password !== $confirm_password ||
        !preg_match('/[A-Z]/', $password) ||
        !preg_match('/[a-z]/', $password) ||
@@ -63,36 +57,29 @@ if(isset($_POST['register'])) {
 
         if($stmt->execute()) {
 
-            $verification_link = "https://campusconnect-ee48.onrender.com/verify.php?token=" . $verification_token;
+            // ✅ CREATE VERIFICATION LINK
+            $verification_link = BASE_URL . "/verify.php?token=" . $verification_token;
 
-            $mail = new PHPMailer(true);
+            // ✅ EMAIL CONTENT
+            $subject = "Verify Your Email - CampusConnect";
 
-            try {
-                $mail->isSMTP();
-                $mail->Host = SMTP_HOST;
-$mail->SMTPAuth = true;
-$mail->Username = SMTP_USER;
-$mail->Password = SMTP_PASS;
-$mail->SMTPSecure = SMTP_SECURE;
-$mail->Port = SMTP_PORT;
-$mail->SMTPDebug = 2;
-$mail->Debugoutput = 'html';
-$mail->setFrom(SMTP_EMAIL, 'CampusConnect');
-                $mail->addAddress($email);
+            $body = "
+                <h3>Welcome to CampusConnect!</h3>
+                <p>Please click below to verify your account:</p>
+                <br>
+                <a href='$verification_link' style='
+                    background:#8A00C4;
+                    color:white;
+                    padding:10px 20px;
+                    text-decoration:none;
+                    border-radius:5px;
+                '>Verify Account</a>
+            ";
 
-                $mail->isHTML(true);
-                $mail->Subject = 'Verify Your Email - CampusConnect';
-                $mail->Body = "
-                    <h3>Welcome to CampusConnect!</h3>
-                    <p>Please click below to verify your account:</p>
-                    <a href='$verification_link'>Verify Account</a>
-                ";
-                $mail->send();
-                $success = "Registration successful! Please check your email to verify your account.";
+            // ✅ SEND EMAIL USING API
+            sendMail($email, $name, $subject, $body);
 
-            } catch (Exception $e) {
-    $error = "Mailer Error: " . $mail->ErrorInfo;
-}
+            $success = "Registration successful! Please check your email to verify your account.";
 
         } else {
             $error = "Registration failed.";
