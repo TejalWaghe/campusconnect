@@ -1,13 +1,18 @@
 <?php
-// Brevo API Configuration (NO SMTP anymore)
 
-// IMPORTANT: Set this in Render Environment Variables
-define("BREVO_API_KEY", getenv("BREVO_API_KEY"));
+if (!defined("BREVO_API_KEY")) {
+    define("BREVO_API_KEY", getenv("BREVO_API_KEY"));
+}
 
-// Your verified sender email (must be verified in Brevo)
-define("SENDER_EMAIL", "campusconnect.project2026@gmail.com");
-define("SENDER_NAME", "CampusConnect");
+if (!defined("SENDER_EMAIL")) {
+    define("SENDER_EMAIL", "campusconnect.project2026@gmail.com");
+}
 
-// Base URL of your project (used in links)
-define("BASE_URL", "https://campusconnect-ee48.onrender.com");
+if (!defined("SENDER_NAME")) {
+    define("SENDER_NAME", "CampusConnect");
+}
+
+if (!defined("BASE_URL")) {
+    define("BASE_URL", "https://campusconnect-ee48.onrender.com");
+}
 ?>
