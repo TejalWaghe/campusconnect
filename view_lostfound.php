@@ -204,10 +204,10 @@ Showing <?php echo mysqli_num_rows($result); ?> of <?php echo $total; ?> items
 <?php while($row = mysqli_fetch_assoc($result)){ ?>
 
 <?php
-$type = $row['type']=="Lost" ? "danger" : "success";
-$icon = $row['type']=="Lost" ? "🔴" : "🟢";
+$type = $row['item_type']=="Lost" ? "danger" : "success";
+$icon = $row['item_type']=="Lost" ? "🔴" : "🟢";
 
-$image = "uploads/".$row['image'];
+$image = $row['image'];
 
 $desc = htmlspecialchars($row['description']);
 $desc = strlen($desc)>120 ? substr($desc,0,120)."..." : $desc;
