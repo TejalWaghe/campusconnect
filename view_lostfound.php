@@ -204,11 +204,6 @@ Showing <?php echo mysqli_num_rows($result); ?> of <?php echo $total; ?> items
 <?php while($row = mysqli_fetch_assoc($result)){ ?>
 
 <?php
-echo $row['image'];
-exit;
-?>
-
-<?php
 $type = $row['item_type']=="Lost" ? "danger" : "success";
 $icon = $row['item_type']=="Lost" ? "🔴" : "🟢";
 
