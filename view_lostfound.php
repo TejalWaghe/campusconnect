@@ -202,17 +202,12 @@ Showing <?php echo mysqli_num_rows($result); ?> of <?php echo $total; ?> items
 <div class="row">
 
 <?php while($row = mysqli_fetch_assoc($result)){ ?>
-<?php while($row = mysqli_fetch_assoc($result)){ ?>
 
 <?php
 echo $row['image'];
 exit;
 ?>
 
-<?php
-$type = $row['type']=="Lost" ? "danger" : "success";
-$icon = $row['type']=="Lost" ? "🔴" : "🟢";
-?>
 <?php
 $type = $row['item_type']=="Lost" ? "danger" : "success";
 $icon = $row['item_type']=="Lost" ? "🔴" : "🟢";
@@ -229,11 +224,11 @@ $desc = strlen($desc)>120 ? substr($desc,0,120)."..." : $desc;
 
 <div class="position-absolute m-2">
 <span class="badge bg-<?php echo $type; ?>">
-<?php echo $icon." ".$row['type']; ?>
+<?php echo $icon." ".$row['item_type']; ?>
 </span>
 </div>
 
-<img src="<?php echo file_exists($image)?$image:'https://via.placeholder.com/400x220'; ?>"
+<img src="<?php echo !empty($row['image']) ? $row['image'] : 'https://via.placeholder.com/400x220'; ?>"
 style="height:220px; object-fit:cover;">
 
 <div class="card-body d-flex flex-column">
