@@ -2,9 +2,9 @@
 session_start();
 include("config.php");
 include("smtp_config.php");
-include("send_mail.php"); // ✅ IMPORTANT
+include("send_mail.php"); //  IMPORTANT
 
-/* 🔥 ROLE DETECT */
+/*  ROLE DETECT */
 $role = $_GET['role'] ?? 'student'; // default student
 
 $message = "";
@@ -36,10 +36,10 @@ if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
         $update->bind_param("ss", $token, $email);
         $update->execute();
 
-        /* 🔥 PASS ROLE IN RESET LINK */
+        /*  PASS ROLE IN RESET LINK */
         $reset_link = BASE_URL . "/reset_password.php?token=".$token."&role=".$role;
 
-        // ✅ EMAIL CONTENT
+        //  EMAIL CONTENT
         $subject = "Reset Your Password - CampusConnect";
 
         $body = "
@@ -58,7 +58,7 @@ if(!filter_var($email, FILTER_VALIDATE_EMAIL)){
         <p>This link expires in 30 minutes.</p>
         ";
 
-        // ✅ SEND EMAIL USING BREVO API
+        // SEND EMAIL USING BREVO API
         $sent = sendMail($email, "User", $subject, $body);
 
         if($sent){
@@ -189,7 +189,7 @@ text-decoration:underline;
 
 <?php if($message != "") echo "<div class='message'>$message</div>"; ?>
 
-<!-- 🔥 KEEP ROLE IN FORM -->
+<!-- KEEP ROLE IN FORM -->
 <form method="POST" action="?role=<?php echo $role; ?>">
 <input type="email" name="email" placeholder="Enter your email" required>
 <button type="submit" name="submit">Send Reset Link</button>
