@@ -125,7 +125,7 @@ background:#1a1a1a !important;
 color:#fff !important;
 border:1px solid #444 !important;
 
-/* 🔥 IMPORTANT: more width + padding */
+/*  IMPORTANT: more width + padding */
 min-width:140px;
 padding:6px 35px 6px 10px;
 
