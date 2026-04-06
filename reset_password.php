@@ -3,10 +3,10 @@ include("config.php");
 
 $error = "";
 $valid = false;
-$role = $_GET['role'] ?? 'student'; // 🔥 role detect
+$role = $_GET['role'] ?? 'student'; //  role detect
 
 /* ===============================
-   1️⃣ Validate token
+   1️ Validate token
 ================================= */
 if(isset($_GET['token'])){
 
@@ -36,7 +36,7 @@ if(isset($_GET['token'])){
 }
 
 /* ===============================
-   2️⃣ Reset password
+   2️ Reset password
 ================================= */
 if(isset($_POST['reset'])){
 
